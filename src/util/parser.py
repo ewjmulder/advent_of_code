@@ -1,31 +1,54 @@
-from typing import Union, List, Tuple, Type
+from typing import Union, List, Type
+from src.util.grid import Grid
 import re
+
+_DEFAULT_SEPARATOR = " "
 
 INPUT = "input"
 SAMPLE = "sample"
 SAMPLE_2 = "sample2"
 
 
-def parse_as_string_list(file: str) -> List[str]:
-    return _read_lines(file)
+def parse_string_list_from_file(file: str) -> List[str]:
+    return _read_file_as_lines(file)
 
 
-def parse_as_character_grid(file: str) -> List[List[str]]:
-    return [list(line) for line in _read_lines(file)]
+def parse_string_list_from_string(string: str) -> List[str]:
+    return string.splitlines(keepends=False)
 
 
-def parse_as_number_list(file: str) -> List[int]:
-    return [int(line) for line in _read_lines(file)]
+def parse_character_grid_from_file(file: str) -> Grid[str]:
+    return parse_character_grid_from_lines(_read_file_as_lines(file))
 
 
-def parse_as_number_grid(file: str, separator: str = " ") -> List[List[int]]:
-    return [[int(word) for word in line.split(separator)] for line in _read_lines(file)]
+def parse_character_grid_from_lines(lines: List[str]) -> Grid[str]:
+    return Grid[str]([[character for character in line] for line in lines])
 
 
-def parse_as_regex(file: str, pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
+def parse_number_list_from_file(file: str) -> List[int]:
+    return parse_number_list_from_lines(_read_file_as_lines(file))
+
+
+def parse_number_list_from_lines(lines: List[str]) -> List[int]:
+    return [int(line) for line in lines]
+
+
+def parse_number_grid_from_file(file: str, separator: str = _DEFAULT_SEPARATOR) -> Grid[int]:
+    return parse_number_grid_from_lines(_read_file_as_lines(file), separator)
+
+
+def parse_number_grid_from_lines(lines: List[str], separator: str = _DEFAULT_SEPARATOR) -> Grid[int]:
+    return Grid[int]([[int(word.strip()) for word in line.split(separator)] for line in lines])
+
+
+def parse_regex_from_file(file: str, pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
+    return parse_regex_from_lines(_read_file_as_lines(file), pattern, type_or_types)
+
+
+def parse_regex_from_lines(lines: List[str], pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
     result = []
     regex = re.compile(pattern)
-    for line in _read_lines(file):
+    for line in lines:
         match = regex.match(line)
         if not match:
             raise ValueError(f"Line: '{line}' did not match regex pattern: '{pattern}'")
@@ -39,5 +62,9 @@ def parse_as_regex(file: str, pattern: str, type_or_types: Union[Type, List[Type
     return result
 
 
-def _read_lines(file: str) -> List[str]:
+def _read_file_as_lines(file: str) -> List[str]:
     return [line.rstrip() for line in open(file).readlines()]
+
+
+def _read_file_as_string(file: str) -> str:
+    return open(file).read()
