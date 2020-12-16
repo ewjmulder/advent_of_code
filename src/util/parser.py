@@ -8,6 +8,9 @@ INPUT = "input"
 SAMPLE = "sample"
 SAMPLE_2 = "sample2"
 
+WORD = "([a-zA-Z]+)"
+NUMBER = "([0-9]+)"
+
 
 def parse_string_list_from_file(file: str) -> List[str]:
     return _read_file_as_lines(file)

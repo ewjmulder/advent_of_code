@@ -1,1 +1,3 @@
 bitstring
+python-graph-core
+python-graph-dot
