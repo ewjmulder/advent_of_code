@@ -42,6 +42,9 @@ class Grid(Generic[T]):
 
     # ##### SELECTION FUNCTIONS #####
 
+    def copy(self):
+        Grid[T](row.copy() for row in self.rows)
+
     def get_row(self, row_j: int):
         return self[row_j]
 
