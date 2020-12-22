@@ -70,9 +70,9 @@ class Grid(Generic[T]):
         return neighbors
 
     def get_all_orientations(self, include_flip: bool = True) -> List[Grid[T]]:
-        def _append_three_rotations(orientations):
+        def _append_three_rotations(orientation_list):
             for rotate in range(0, 3):
-                orientations.append(orientations[-1].rotate_right_once())
+                orientation_list.append(orientation_list[-1].rotate_right_once())
 
         orientations = [self.copy()]
         _append_three_rotations(orientations)
