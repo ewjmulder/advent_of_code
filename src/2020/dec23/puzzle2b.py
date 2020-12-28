@@ -1,11 +1,12 @@
 from collections import deque
 
-trial = False
+trial = True
 test = True
-printing_cups = False
-printing = False
+printing_cups = True
+printing = True
 
 input = "389125467"
+# input = "123456789"
 if not test:
     input = "362981754"
 cups = deque([int(char) for char in input])
@@ -17,10 +18,10 @@ if not test:
     for i in range(10, 1000001):
         cups.append(i)
 elif not trial:
-    for i in range(10, 1000001):
+    for i in range(10, 101):
         cups.append(i)
 
-moves = 10000
+moves = 100
 if not test:
     moves = 10000000
 elif trial:
@@ -31,8 +32,8 @@ current_i = 0
 current_val = cups[0]
 pct = int(moves / 100)
 for m in range(0, moves):
-    if m % pct == 0:
-        print(f"{int(m/moves*100)}%")
+    # if m % pct == 0:
+    #     print(f"{int(m/moves*100)}%")
     if printing_cups:
         print(m, cups)
     if printing:
@@ -61,14 +62,13 @@ for m in range(0, moves):
     cups.extendleft(ns)
     current_i = (current_i + 4) % amount
     current_val = new_current_val
-    # print("")
 
-if printing:
+if printing_cups:
     print("")
     print(cups)
 index_1 = cups.index(1)
 cups.rotate(-1 * (index_1 + 1))
-star2 = cups.popleft()
 star1 = cups.popleft()
+star2 = cups.popleft()
 print(star1, star2)
 print(star1 * star2)
