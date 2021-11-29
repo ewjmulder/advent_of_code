@@ -6,22 +6,27 @@ _DEFAULT_SEPARATOR = " "
 
 INPUT = "input"
 SAMPLE = "sample"
-SAMPLE_2 = "sample2"
+SAMPLE2 = "sample2"
 
 WORD = "([a-zA-Z]+)"
 NUMBER = "([0-9]+)"
+ALFANUM = "([a-zA-Z0-9]+)"
 
 
 def parse_string_list_from_file(file: str) -> List[str]:
-    return _read_file_as_lines(file)
+    return read_file_as_lines(file)
 
 
-def parse_string_list_from_string(string: str) -> List[str]:
+def parse_lines_from_string(string: str) -> List[str]:
     return string.splitlines(keepends=False)
 
 
 def parse_character_grid_from_file(file: str) -> Grid[str]:
-    return parse_character_grid_from_lines(_read_file_as_lines(file))
+    return parse_character_grid_from_lines(read_file_as_lines(file))
+
+
+def parse_character_grid_from_string(string: str) -> Grid[str]:
+    return parse_character_grid_from_lines(parse_lines_from_string(string))
 
 
 def parse_character_grid_from_lines(lines: List[str]) -> Grid[str]:
@@ -29,7 +34,11 @@ def parse_character_grid_from_lines(lines: List[str]) -> Grid[str]:
 
 
 def parse_number_list_from_file(file: str) -> List[int]:
-    return parse_number_list_from_lines(_read_file_as_lines(file))
+    return parse_number_list_from_lines(read_file_as_lines(file))
+
+
+def parse_number_list_from_string(string: str) -> List[int]:
+    return parse_number_list_from_lines(parse_lines_from_string(string))
 
 
 def parse_number_list_from_lines(lines: List[str]) -> List[int]:
@@ -37,7 +46,11 @@ def parse_number_list_from_lines(lines: List[str]) -> List[int]:
 
 
 def parse_number_grid_from_file(file: str, separator: str = _DEFAULT_SEPARATOR) -> Grid[int]:
-    return parse_number_grid_from_lines(_read_file_as_lines(file), separator)
+    return parse_number_grid_from_lines(read_file_as_lines(file), separator)
+
+
+def parse_number_grid_from_string(string: str, separator: str = _DEFAULT_SEPARATOR) -> Grid[int]:
+    return parse_number_grid_from_lines(parse_lines_from_string(string), separator)
 
 
 def parse_number_grid_from_lines(lines: List[str], separator: str = _DEFAULT_SEPARATOR) -> Grid[int]:
@@ -45,7 +58,11 @@ def parse_number_grid_from_lines(lines: List[str], separator: str = _DEFAULT_SEP
 
 
 def parse_regex_from_file(file: str, pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
-    return parse_regex_from_lines(_read_file_as_lines(file), pattern, type_or_types)
+    return parse_regex_from_lines(read_file_as_lines(file), pattern, type_or_types)
+
+
+def parse_regex_from_string(string: str, pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
+    return parse_regex_from_lines(parse_lines_from_string(string), pattern, type_or_types)
 
 
 def parse_regex_from_lines(lines: List[str], pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
@@ -65,9 +82,9 @@ def parse_regex_from_lines(lines: List[str], pattern: str, type_or_types: Union[
     return result
 
 
-def _read_file_as_lines(file: str) -> List[str]:
+def read_file_as_lines(file: str) -> List[str]:
     return [line.rstrip() for line in open(file).readlines()]
 
 
-def _read_file_as_string(file: str) -> str:
+def read_file_as_string(file: str) -> str:
     return open(file).read()

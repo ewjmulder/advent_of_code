@@ -1,109 +1,39 @@
-from __future__ import annotations
-from typing import List, TypeVar, Generic, Callable
-from dataclasses import dataclass
+# For graph functionality, the python-graph-core library should be used.
+# This module contains some extra util functions for convenience
 
-from src.util.coordinate import Coordinate, coord_from_grid
-
-T = TypeVar('T')
-R = TypeVar('R')
-
-
-@dataclass
-class Graph(Generic[T]):
-    rows: List[List[T]]
-
-    def __post_init__(self):
-        if len(self.rows) == 0:
-            raise ValueError("Grid must have at least 1 row")
-        if len(set([len(row) for row in self.rows])) > 1:
-            raise ValueError("All rows in a grid must have the same length")
-
-    def __getitem__(self, row_j: int):
-        return self.rows[row_j]
-
-    # ##### AGGREGATION FUNCTIONS #####
-
-    @property
-    def height(self):
-        return len(self.rows)
-
-    @property
-    def width(self):
-        return len(self.rows[0])
-
-    def count(self, value: T):
-        return sum([row.count(value) for row in self.rows])
-
-    def min(self):
-        return min(self.flatten())
-
-    def max(self):
-        return max(self.flatten())
-
-    # ##### SELECTION FUNCTIONS #####
-
-    def get_row(self, row_j: int):
-        return self[row_j]
-
-    def get_column(self, column_i: int):
-        return [self[row_j][column_i] for row_j in range(0, len(self.rows))]
-
-    def get_neighbors(self, coordinate: Coordinate, include_diagonal: bool = True, include_own_cell: bool = False):
-        neighbors = []
-        for row_i in range(coordinate.row - 1, coordinate.row + 2):
-            for column_j in range(coordinate.column - 1, coordinate.column + 2):
-                append = True
-                if row_i == coordinate.row and column_j == coordinate.column:
-                    if not include_own_cell:
-                        append = False
-                elif row_i != coordinate.row and column_j != coordinate.column:
-                    if not include_diagonal:
-                        append = False
-                if append and 0 <= row_i < self.height and 0 <= column_j < self.width:
-                    neighbors.append(self[row_i][column_j])
-        return neighbors
-
-    def flatten(self):
-        return [cell for row in self.rows for cell in row]
-
-    # ##### HIGHER ORDER FUNCTIONS #####
-
-    def map_values(self, func: Callable[[T], R]) -> Grid[R]:
-        return Grid[R]([[func(cell) for cell in row] for row in self.rows])
-
-    def map_values_and_coordinates(self, func: Callable[[T, Coordinate], R]) -> Grid[R]:
-        mapped_rows = []
-        for row_j in range(0, len(self.rows)):
-            mapped_row = []
-            for column_i in range(0, len(self[row_j])):
-                mapped_row.append(func(self[row_j][column_i], coord_from_grid(row_j, column_i)))
-            mapped_rows.append(mapped_row)
-        return Grid[R](mapped_rows)
-
-    def __str__(self):
-        return self.to_string()
-
-    def to_string_separated(self):
-        max_width = self.map_values(str).map_values(len).max()
-        return self.to_string(max_width, True)
-
-    def to_string(self, cell_width: int = 1, separate_cells: bool = False):
-        lines = []
-        for row in self.rows:
-            line = ""
-            for cell in row:
-                line += str(cell).rjust(cell_width, " ") + (" " if separate_cells else "")
-            lines.append(line)
-        return "\n".join(lines)
+from typing import Iterable, List
+from pygraph.classes.graph import graph
+from pygraph.algorithms.minmax import shortest_path as shortest_paths, path as shortest_path
+from .parser import read_file_as_lines, parse_lines_from_string
 
 
-def grid_of_characters(strings: List[str]) -> Grid[str]:
-    return Grid[str]([[char for char in string] for string in strings])
+def parse_graph_from_file(file: str, separator: str) -> graph:
+    return parse_graph_from_lines(read_file_as_lines(file), separator)
 
 
-def grid_of_strings(rows: List[List[str]]) -> Grid[str]:
-    return Grid[str](rows)
+def parse_graph_from_string(string: str, separator: str) -> graph:
+    return build_graph([line.split(separator) for line in parse_lines_from_string(string)])
 
 
-def grid_of_numbers(rows: List[List[int]]) -> Grid[int]:
-    return Grid[int](rows)
+def parse_graph_from_lines(lines: List[str], separator: str) -> graph:
+    return build_graph([line.split(separator) for line in lines])
+
+
+def build_graph(edges: Iterable[Iterable[str]], accept_duplicate_edges: bool = True) -> graph:
+    g = graph()
+    for edge in edges:
+        for node in edge:
+            if not g.has_node(node):
+                g.add_node(node)
+    for (node_from, node_to) in edges:
+        if not accept_duplicate_edges or not g.has_edge((node_from, node_to)):
+            g.add_edge((node_from, node_to))
+    return g
+
+
+def calc_shortest_path(g: graph, from_node: str, to_node: str) -> List[str]:
+    return list(reversed(shortest_path(shortest_paths(g, from_node)[0], to_node)))
+
+
+def calc_shortest_path_len(g: graph, from_node: str, to_node: str) -> int:
+    return len(calc_shortest_path(g, from_node, to_node)) - 1
