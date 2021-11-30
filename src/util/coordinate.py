@@ -3,21 +3,21 @@ from dataclasses import dataclass
 
 @dataclass
 class Coordinate:
-    x: int
-    y: int
+    row: int
+    column: int
 
     @property
-    def row(self):
-        return self.y
+    def x(self):
+        return self.column
 
     @property
-    def column(self):
-        return self.x
+    def y(self):
+        return self.row
 
 
 def coord_from_point(x, y):
-    return Coordinate(x, y)
+    return Coordinate(row=y, column=x)
 
 
 def coord_from_grid(row, column):
-    return Coordinate(column, row)
+    return Coordinate(row, column)

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TypeVar, Generic, Callable
+from typing import List, Tuple, TypeVar, Generic, Callable, Union, Dict
 from dataclasses import dataclass
 
 from src.util.coordinate import Coordinate, coord_from_grid
@@ -46,6 +46,14 @@ class Grid(Generic[T]):
     def max(self):
         return max(self.flatten())
 
+    # ##### SEARCH FUNCTIONS #####
+
+    def find_cells(self, value_or_values: Union[T, List[T]]) -> List[Tuple[T, Coordinate]]:
+        return [(cell, coord_from_grid(row_i, column_i))
+                for (row_i, row) in enumerate(self.rows)
+                for (column_i, cell) in enumerate(row)
+                if (isinstance(value_or_values, List) and cell in value_or_values) or cell == value_or_values]
+
     # ##### SELECTION FUNCTIONS #####
 
     def get_row(self, row_j: int):
@@ -80,6 +88,11 @@ class Grid(Generic[T]):
             orientations.append(self.flip_horizontal())
             _append_three_rotations(orientations)
         return orientations
+
+    # ##### MUTATION FUNCTIONS #####
+
+    def replace_values(self, replacements: Dict[T, T]) -> Grid[T]:
+        return Grid[T]([[replacements[cell] if cell in replacements else cell for cell in row] for row in self.rows])
 
     # ##### SHAPE SHIFTING FUNCTIONS #####
 

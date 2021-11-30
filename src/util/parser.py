@@ -83,7 +83,7 @@ def parse_regex_from_lines(lines: List[str], pattern: str, type_or_types: Union[
 
 
 def read_file_as_lines(file: str) -> List[str]:
-    return [line.rstrip() for line in open(file).readlines()]
+    return parse_lines_from_string(read_file_as_string(file))
 
 
 def read_file_as_string(file: str) -> str:
