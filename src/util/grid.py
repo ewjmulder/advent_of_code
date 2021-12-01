@@ -21,11 +21,14 @@ class Grid(Generic[T]):
         for row in self.rows:
             self.hash_value *= sum([hash(cell) for cell in row])
 
+    def __hash__(self):
+        return self.hash_value
+
     def __getitem__(self, row_j: int):
         return self.rows[row_j]
 
-    def __hash__(self):
-        return self.hash_value
+    def get_cell(self, coord: Coordinate) -> T:
+        return self[coord.row][coord.column]
 
     # ##### AGGREGATION FUNCTIONS #####
 
@@ -96,10 +99,10 @@ class Grid(Generic[T]):
 
     # ##### SHAPE SHIFTING FUNCTIONS #####
 
-    def copy(self):
+    def copy(self) -> Grid[T]:
         return Grid[T]([row.copy() for row in self.rows])
 
-    def flatten(self):
+    def flatten(self) -> List[T]:
         return [cell for row in self.rows for cell in row]
 
     def rotate_right(self, steps: int) -> Grid[T]:

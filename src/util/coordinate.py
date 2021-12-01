@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -13,6 +15,18 @@ class Coordinate:
     @property
     def y(self):
         return self.row
+
+    def neighbor_left(self) -> Coordinate:
+        return Coordinate(self.row, self.column - 1)
+
+    def neighbor_right(self) -> Coordinate:
+        return Coordinate(self.row, self.column + 1)
+
+    def neighbor_above(self) -> Coordinate:
+        return Coordinate(self.row - 1, self.column)
+
+    def neighbor_below(self) -> Coordinate:
+        return Coordinate(self.row + 1, self.column)
 
 
 def coord_from_point(x, y):
