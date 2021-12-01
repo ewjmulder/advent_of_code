@@ -13,7 +13,7 @@ NUMBER = "([0-9]+)"
 ALFANUM = "([a-zA-Z0-9]+)"
 
 
-def parse_string_list_from_file(file: str) -> List[str]:
+def parse_lines_from_file(file: str) -> List[str]:
     return read_file_as_lines(file)
 
 
