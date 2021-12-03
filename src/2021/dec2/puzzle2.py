@@ -1,6 +1,6 @@
 from src.util import *
 
-commands = parse_regex_from_file(INPUT, f"{WORD} {NUMBER}", [str, int])
+commands = Parser.from_file(INPUT).to_regex_match(f"{WORD} {NUMBER}", [str, int])
 
 aim = 0
 forward = 0

@@ -89,11 +89,8 @@ grid = grid.replace_values({">": "-", "<": "-", "^": "|", "v": "|"})
 
 
 collision: Coordinate = None
-count = 0
 while collision is None:
     carts = sorted(carts, key=lambda cart: cart.pos.row * grid.width + cart.pos.column)
-    # print(carts)
-    count += 1
     for cart in carts:
         cart.step()
         for (c1, c2) in list(combinations(carts, 2)):
