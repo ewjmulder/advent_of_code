@@ -58,11 +58,17 @@ class Grid(Generic[T]):
                 for (column_i, cell) in enumerate(row)
                 if (isinstance(value_or_values, List) and cell in value_or_values) or cell == value_or_values]
 
+    def find_most_common_in_grid(self, default_for_tie: T = None) -> T:
+        return self._find_common_in_list(self.flatten(), True, default_for_tie)
+
     def find_most_common_in_row(self, row_i: int, default_for_tie: T = None) -> T:
         return self._find_common_in_list(self.get_row(row_i), True, default_for_tie)
 
     def find_most_common_in_column(self, column_i: int, default_for_tie: T = None) -> T:
         return self._find_common_in_list(self.get_column(column_i), True, default_for_tie)
+
+    def find_least_common_in_grid(self, default_for_tie: T = None) -> T:
+        return self._find_common_in_list(self.flatten(), False, default_for_tie)
 
     def find_least_common_in_row(self, row_i: int, default_for_tie: T = None) -> T:
         return self._find_common_in_list(self.get_row(row_i), False, default_for_tie)
@@ -70,7 +76,7 @@ class Grid(Generic[T]):
     def find_least_common_in_column(self, column_i: int, default_for_tie: T = None) -> T:
         return self._find_common_in_list(self.get_column(column_i), False, default_for_tie)
 
-    def _find_common_in_list(self, input_list: List[T], most: bool, default_for_tie: T = None) -> T:
+    def _find_common_in_list(self, input_list: List[T], most: bool, default_for_tie: T) -> T:
         most_common = Counter(input_list).most_common()
         if not most:
             most_common = list(reversed(most_common))
@@ -172,15 +178,17 @@ class Grid(Generic[T]):
             mapped_rows.append(mapped_row)
         return Grid[R](mapped_rows)
 
+    # ##### DISPLAY FUNCTIONS #####
+
     def __str__(self) -> str:
         return self.to_string()
+
+    def to_string(self, cell_width: int = 1, separate_cells: bool = False):
+        return "\n".join(self.to_string_list(cell_width, separate_cells))
 
     def to_string_justified(self) -> str:
         max_width = self.map_values(str).map_values(len).max()
         return self.to_string(max_width, True)
-
-    def to_string(self, cell_width: int = 1, separate_cells: bool = False):
-        return "\n".join(self.to_string_list(cell_width, separate_cells))
 
     def to_string_list(self, cell_width: int = 1, separate_cells: bool = False):
         lines = []

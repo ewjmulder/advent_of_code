@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -e
+
+PYTEST_REPORT_FILE=unittest-report/pytest.xml
+PYTEST_COV_REPORT_FILE=unittest-report/pytest-cov.xml
+
+# Delete any previous output reports to not interfere with the current run
+rm -rf unittest-report
+# Run pytest and pytest-cov and generate the (JUnit style) XML output reports
+venv/bin/pytest --junitxml=${PYTEST_REPORT_FILE} --cov-report xml:${PYTEST_COV_REPORT_FILE} --cov-report term --cov-branch --cov="src/util"
+
+assert_file_exists() {
+  if [[ ! -f $1 ]]
+  then
+    echo ""
+    echo "Report file $1 does not exist!"
+    echo "Please check for any errors and/or warnings above."
+    exit 1
+  fi
+}
+
+# Check that report files were actually written, to prevent a wrong conclusion of no missed coverage
+assert_file_exists $PYTEST_REPORT_FILE
+assert_file_exists $PYTEST_COV_REPORT_FILE
+
+missed_coverage() {
+  echo ""
+  echo "=== MISSED $3 COVERAGE ==="
+  echo ""
+  # Disable failing on error exit code, cause otherwise the no-match grep will break the script.
+  set +e
+  # shellcheck disable=SC2002
+  MISSED_COVERAGE=$(cat unittest-report/pytest-cov.xml | grep "$1" | grep -v "$2")
+  if [ -z "$MISSED_COVERAGE" ]
+  then
+    echo "None, unit tests have full $4 coverage, well done! :)"
+  else
+    echo "$MISSED_COVERAGE"
+  fi
+  echo ""
+}
+
+# Grep missed line coverage
+missed_coverage "line-rate=\|hits=\"0\"" "line-rate=\"1\"" "LINE" "line"
+# Grep missed branch coverage
+missed_coverage "branch-rate=\|condition-coverage=" "branch-rate=\"1\"\|condition-coverage=\"100%" "BRANCH" "branch"
