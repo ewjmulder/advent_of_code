@@ -7,7 +7,8 @@ from src.util.grid import Grid
 from src.util.bit_string import BitString
 from src.util.graph import Graph
 
-_DEFAULT_SEPARATOR = " "
+# A Separator of None means: any whitespace
+_DEFAULT_SEPARATOR = None
 
 INPUT = "input"
 SAMPLE = "sample"
@@ -40,6 +41,9 @@ class Parser:
     def to_lines(self) -> List[str]:
         return self.lines
 
+    def to_sections(self) -> List[str]:
+        return self.to_string().split("\n\n")
+
     def to_number_list(self) -> List[int]:
         return [int(line) for line in self.lines]
 
@@ -51,10 +55,13 @@ class Parser:
 
     def to_number_grid(self, separator: Optional[str] = _DEFAULT_SEPARATOR) -> Grid[int]:
         def split_line(line: str) -> List[str]:
-            if separator:
-                return line.split(separator)
-            else:
+            if separator == "":
+                # Empty string means: no separator, take character by character
                 return [char for char in line]
+            else:
+                # None means: default of split, which is any whitespace
+                # Any other value means: use this specific separator to split.
+                return line.split(separator)
 
         return Grid[int]([[int(word.strip()) for word in split_line(line)] for line in self.lines])
 

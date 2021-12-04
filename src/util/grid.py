@@ -95,8 +95,17 @@ class Grid(Generic[T]):
     def get_row(self, row_i: int):
         return self[row_i]
 
+    def get_rows(self):
+        return self.rows
+
     def get_column(self, column_i: int):
         return [self[row_i][column_i] for row_i in range(0, len(self.rows))]
+
+    def get_columns(self):
+        return [self.get_column(column_i) for column_i in range(self.width)]
+
+    def get_rows_and_columns(self):
+        return self.get_rows() + self.get_columns()
 
     def get_neighbors(self, coordinate: Coordinate, include_diagonal: bool = True, include_own_cell: bool = False):
         neighbors = []

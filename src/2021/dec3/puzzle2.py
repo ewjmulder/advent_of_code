@@ -2,7 +2,7 @@ from src.util import *
 
 
 def generator_rating(common_function, bit: int) -> BitString:
-    grid = Parser.from_file(INPUT).to_number_grid(separator=None)
+    grid = Parser.from_file(INPUT).to_number_grid(separator="")
     for column_i in range(grid.width):
         most_common_or_default = [common_function(grid, i, default_for_tie=bit) for i in range(grid.width)]
         grid = grid.filter_rows(lambda row: row[column_i] == most_common_or_default[column_i])
