@@ -13,6 +13,13 @@ R = TypeVar('R')
 class Grid(Generic[T]):
     rows: List[List[T]]
 
+    @classmethod
+    def fill_grid(cls, grid_height: int, grid_width: int, value: T) -> Grid[T]:
+        rows = []
+        for row_i in range(grid_height):
+            rows.append(grid_width * [value])
+        return Grid(rows)
+
     def __post_init__(self):
         if len(self.rows) == 0:
             raise ValueError("Grid must have at least 1 row")
@@ -52,11 +59,15 @@ class Grid(Generic[T]):
 
     # ##### SEARCH FUNCTIONS #####
 
-    def find_cells(self, value_or_values: Union[T, List[T]]) -> List[Tuple[T, Coordinate]]:
+    def find_cells_by_predicate(self, predicate_function) -> List[Tuple[T, Coordinate]]:
         return [(cell, coord_from_grid(row_i, column_i))
                 for (row_i, row) in enumerate(self.rows)
                 for (column_i, cell) in enumerate(row)
-                if (isinstance(value_or_values, List) and cell in value_or_values) or cell == value_or_values]
+                if predicate_function(cell)]
+
+    def find_cells_by_value(self, value_or_values: Union[T, List[T]]) -> List[Tuple[T, Coordinate]]:
+        return self.find_cells_by_predicate(lambda cell: cell in value_or_values if isinstance(value_or_values, List)
+                                            else cell == value_or_values)
 
     def find_most_common_in_grid(self, default_for_tie: T = None) -> T:
         return self._find_common_in_list(self.flatten(), True, default_for_tie)

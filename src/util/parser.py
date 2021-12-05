@@ -12,7 +12,7 @@ _DEFAULT_SEPARATOR = None
 
 INPUT = "input"
 SAMPLE = "sample"
-SAMPLE2 = "sample2"
+SAMPLE_2 = "sample2"
 
 WORD = "([a-zA-Z]+)"
 NUMBER = "([0-9]+)"
