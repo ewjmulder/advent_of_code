@@ -44,7 +44,10 @@ class Parser:
     def to_sections(self) -> List[str]:
         return self.to_string().split("\n\n")
 
-    def to_number_list(self) -> List[int]:
+    def to_number_list_single_line(self, separator: str = _DEFAULT_SEPARATOR) -> List[int]:
+        return [int(word.strip()) for word in self.lines[0].split(separator)]
+
+    def to_number_list_multi_line(self) -> List[int]:
         return [int(line) for line in self.lines]
 
     def to_bitstring_list(self) -> List[BitString]:
@@ -82,7 +85,7 @@ class Parser:
         return result
 
     def to_graph(self, separator: str) -> Graph:
-        return Graph.from_edges([line.split(separator) for line in self.lines])
+        return Graph.from_edges([[word.strip() for word in line.split(separator)] for line in self.lines])
 
 
 

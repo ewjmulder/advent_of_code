@@ -1,7 +1,7 @@
 from typing import Any
 
-from src.util import *
 from src.main.base_solution import BaseSolution
+from src.util import *
 
 
 class Solution(BaseSolution):
@@ -37,4 +37,3 @@ class Solution(BaseSolution):
 
 
 Solution().run(1, INPUT)
-

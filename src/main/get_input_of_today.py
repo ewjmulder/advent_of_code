@@ -1,6 +1,7 @@
 import os
-import requests
 from datetime import datetime
+
+import requests
 
 now = datetime.now()
 if now.month != 12:
@@ -11,7 +12,7 @@ else:
     print("Going to get the input for you!")
     day_of_month = now.day
     input_url = f"https://adventofcode.com/{now.year}/day/{day_of_month}/input"
-    output_file = f"dec{day_of_month}/input"
+    output_file = f"../{now.year}/dec{day_of_month}/input"
 
     headers = {"Cookie": f"session={os.environ['SESSIONID']}"}
 

@@ -1,7 +1,7 @@
 from typing import Any
 
-from src.util import *
 from src.main.base_solution import BaseSolution
+from src.util import *
 
 CHECKED = -1
 
@@ -32,4 +32,3 @@ class Solution(BaseSolution):
 
 
 Solution().run(2, INPUT)
-
