@@ -1,4 +1,3 @@
 from src.util import *
 
-x = parse_
-
+x = Parser.from_file(SAMPLE).to_
