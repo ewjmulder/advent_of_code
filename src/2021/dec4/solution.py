@@ -1,6 +1,4 @@
-from typing import Any
-
-from src.main.base_solution import BaseSolution
+from src.main.base_solution import BaseSolution, Any
 from src.util import *
 
 CHECKED = -1
