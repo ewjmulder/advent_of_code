@@ -30,13 +30,13 @@ class Solution(BaseSolution):
                 task.separateDomain(var, digits_in_sorted[6:9])
 
             # All digits must be different (value[0] = None, so total length of unique values = 11)
-            task.addConstraint('len(set(value)) == 11')
+            task.addConstraint("len(set(value)) == 11")
 
-            # Provide checks that uniquely identify 3, 6, 5 and 9. The rest follow automatically.
-            task.addConstraint('len(value[3].intersection(value[1])) == 2')
-            task.addConstraint('len(value[6].intersection(value[1])) == 1')
-            task.addConstraint('len(value[5].intersection(value[6])) == 5')
-            task.addConstraint('len(value[9].intersection(value[5])) == 5')
+            # Provide checks that uniquely identify 3, 6, 5 and 9. The rest follows automatically.
+            task.addConstraint("len(value[3].intersection(value[1])) == 2")
+            task.addConstraint("len(value[6].intersection(value[1])) == 1")
+            task.addConstraint("len(value[5].intersection(value[6])) == 5")
+            task.addConstraint("len(value[9].intersection(value[5])) == 5")
 
             task.solve_dfs()
             solution = {task.value[i]: i for i in range(11)}
