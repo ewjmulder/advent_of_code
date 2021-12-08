@@ -1,14 +1,14 @@
+from typing import List, Iterable
+
+from .bit_string import BitString
+from .coordinate import Coordinate
+from .graph import Graph
+from .grid import Grid
 from .parser import Parser, SAMPLE, SAMPLE_2, INPUT, WORD, NUMBER, ALFANUM
 from .value_reference import ValueReference
-from .coordinate import Coordinate
-from .grid import Grid
-from .graph import Graph
-from .bit_string import BitString
-
-from typing import List
 
 
-def flatten(lists: List[List]) -> List:
+def flatten(lists: Iterable[Iterable]) -> List:
     return [item for sublist in lists for item in sublist]
 
 
