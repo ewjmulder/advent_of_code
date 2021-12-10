@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import List, Set, TypeVar, Generic, Callable, Union, Dict
 
 from src.util.collections import union_sets
-from src.util.coordinate import Coordinate, coord_from_grid
+from src.util.coordinate import Coordinate
 
 T = TypeVar('T')
 R = TypeVar('R')
@@ -238,7 +238,7 @@ class Grid(Generic[T]):
         for row_i in range(0, len(self.rows)):
             mapped_row = []
             for column_i in range(0, len(self[row_i])):
-                mapped_row.append(func(self[row_i][column_i], coord_from_grid(row_i, column_i)))
+                mapped_row.append(func(self[row_i][column_i], Coordinate.from_grid(row_i, column_i)))
             mapped_rows.append(mapped_row)
         return Grid[R](mapped_rows)
 

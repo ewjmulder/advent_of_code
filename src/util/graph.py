@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Iterable, List
-from pygraph.classes.graph import graph
-from pygraph.algorithms.minmax import shortest_path as shortest_paths, path as shortest_path
+
 from dataclasses import dataclass
+from typing import Iterable, List
+
+from pygraph.algorithms.minmax import shortest_path as shortest_paths, path as shortest_path
+from pygraph.classes.graph import graph
 
 
 @dataclass
@@ -22,7 +24,7 @@ class Graph:
         return Graph(g)
 
     def shortest_path(self, from_node: str, to_node: str) -> List[str]:
-            return list(reversed(shortest_path(shortest_paths(self.wrapped_graph, from_node)[0], to_node)))
+        return list(reversed(shortest_path(shortest_paths(self.wrapped_graph, from_node)[0], to_node)))
 
     def shortest_path_len(self, from_node: str, to_node: str) -> int:
         return len(self.shortest_path(from_node, to_node)) - 1

@@ -1,10 +1,10 @@
 from functools import reduce
-from operator import add, mul
+from operator import mul
 from typing import Iterable, List, Set
 
 
 def flatten(collections: Iterable[Iterable]) -> List:
-    return reduce(add, collections, [])
+    return reduce(lambda iter1, iter2: list(iter1) + list(iter2), collections, [])
 
 
 def union_sets(sets: Iterable[Set]) -> Set:
@@ -12,7 +12,11 @@ def union_sets(sets: Iterable[Set]) -> Set:
 
 
 def multiply(collection: Iterable[int]):
-    return reduce(mul, collection, 1)
+    list_collection = list(collection)
+    if len(list(list_collection)) == 0:
+        return 0
+    else:
+        return reduce(mul, list_collection, 1)
 
 
 def range_incl(val_from: int, val_to: int) -> List[int]:
