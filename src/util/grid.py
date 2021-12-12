@@ -190,10 +190,6 @@ class Grid(Generic[T]):
 
     # ##### TRANSFORMATION FUNCTIONS #####
 
-    def replace_values(self, replacements: Dict[T, T]) -> Grid[T]:
-        return Grid[T]([[replacements[value] if value in replacements else value for value in row]
-                        for row in self.rows])
-
     def copy(self) -> Grid[T]:
         return Grid[T]([row.copy() for row in self.rows])
 
@@ -230,17 +226,16 @@ class Grid(Generic[T]):
 
     # ##### HIGHER ORDER FUNCTIONS #####
 
-    def map_values(self, mapping_function: Callable[[T], R]) -> Grid[R]:
-        return Grid[R]([[mapping_function(value) for value in row] for row in self.rows])
+    def map_values_by_function(self, mapping_function: Callable[[T], R]) -> Grid[R]:
+        return self.map_cells(lambda cell: mapping_function(cell.value))
 
-    def map_values_and_coordinates(self, func: Callable[[T, Coordinate], R]) -> Grid[R]:
-        mapped_rows = []
-        for row_i in range(0, len(self.rows)):
-            mapped_row = []
-            for column_i in range(0, len(self[row_i])):
-                mapped_row.append(func(self[row_i][column_i], Coordinate.from_grid(row_i, column_i)))
-            mapped_rows.append(mapped_row)
-        return Grid[R](mapped_rows)
+    def map_values_by_dict(self, replacements: Dict[T, T]) -> Grid[T]:
+        return self.map_cells(lambda cell: replacements[cell.value] if cell.value in replacements else cell.value)
+
+    def map_cells(self, mapping_function: Callable[[Cell[T]], R]) -> Grid[R]:
+        return Grid[R]([[mapping_function(Cell(Coordinate.from_grid(row_i, column_i), self[row_i][column_i]))
+                         for column_i in range(self.width)]
+                        for row_i in range(self.height)])
 
     # ##### DISPLAY FUNCTIONS #####
 
@@ -251,7 +246,7 @@ class Grid(Generic[T]):
         return "\n".join(self.to_string_list(cell_width, separate_cells))
 
     def to_string_justified(self) -> str:
-        max_width = self.map_values(str).map_values(len).max()
+        max_width = self.map_values_by_function(str).map_values_by_function(len).max()
         return self.to_string(max_width, True)
 
     def to_string_list(self, cell_width: int = 1, separate_cells: bool = False):

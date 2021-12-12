@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Union, List, Type, Optional
-from dataclasses import dataclass
-import re
 
-from src.util.grid import Grid
+import re
+from dataclasses import dataclass
+from typing import Union, List, Type, Optional
+
 from src.util.bit_string import BitString
 from src.util.graph import Graph
+from src.util.grid import Grid
 
 # A Separator of None means: any whitespace
 _DEFAULT_SEPARATOR = None
@@ -40,6 +41,12 @@ class Parser:
 
     def to_lines(self) -> List[str]:
         return self.lines
+
+    def to_word_lists(self, separator: str = _DEFAULT_SEPARATOR) -> List[List[str]]:
+        return [[word.strip() for word in line.split(separator)] for line in self.lines]
+
+    def to_number_lists(self, separator: str = _DEFAULT_SEPARATOR) -> List[List[int]]:
+        return [[int(word) for word in words] for words in self.to_word_lists(separator)]
 
     def to_sections(self) -> List[str]:
         return self.to_string().split("\n\n")
@@ -84,9 +91,8 @@ class Parser:
             result.append(groups)
         return result
 
-    def to_graph(self, separator: str) -> Graph:
-        return Graph.from_edges([[word.strip() for word in line.split(separator)] for line in self.lines])
+    def to_string_graph(self, separator: str = _DEFAULT_SEPARATOR) -> Graph[str]:
+        return Graph.from_edges(self.to_word_lists(separator))
 
-
-
-
+    def to_number_graph(self, separator: str = _DEFAULT_SEPARATOR) -> Graph[int]:
+        return Graph.from_edges(self.to_number_lists(separator))
