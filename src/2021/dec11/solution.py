@@ -11,25 +11,13 @@ class Solution(BaseSolution):
         all_neighbors = flatten([levels.get_neighbor_cells(cell.coord, include_diagonal=True) for cell in cells])
         for neighbor in all_neighbors:
             if neighbor.value > 0:
-                # neighbor.value += 1
-                levels[neighbor.coord.row][neighbor.coord.column] += 1
-        cells_to_flash = []
-        # cells_to_flash = {neighbor for neighbor in all_neighbors if levels.get_value(neighbor.coord) >= 10}
-        # for cell in cells:
-        #     neighbors = levels.get_neighbor_cells(cell.coord, include_diagonal=True)
-        # print("before", len(all_neighbors))
-        all_neighbors = set(all_neighbors)
-        # print("after", len(all_neighbors))
-        # ????
-        for cell in cells:
-            for neighbor in levels.get_neighbor_cells(cell.coord, include_diagonal=True):
-                if neighbor.value >= 10:
-                    neighbor.value = 0
-                    levels[neighbor.coord.row][neighbor.coord.column] = 0
-                    cells_to_flash.append(neighbor)
+                neighbor.value += 1
+        cells_to_flash = {neighbor for neighbor in set(all_neighbors) if neighbor.value >= 10}
         if len(cells_to_flash) == 0:
             return levels, len(cells)
         else:
+            for cell in cells_to_flash:
+                cell.value = 0
             levels, sub_flashes = self._do_flash(levels, cells_to_flash)
             return levels, len(cells) + sub_flashes
 
