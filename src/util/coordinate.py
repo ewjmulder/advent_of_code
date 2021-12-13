@@ -55,7 +55,7 @@ class Coordinate:
     def get_neighbor_right_below(self) -> Coordinate:
         return Coordinate(self.row + 1, self.column + 1)
 
-    def get_neighbors(self, include_diagonal: bool = True) -> List[Coordinate]:
+    def get_neighbors(self, include_diagonal: bool) -> List[Coordinate]:
         neighbors = [self.get_neighbor_left(), self.get_neighbor_right(),
                      self.get_neighbor_above(), self.get_neighbor_below()]
         if include_diagonal:

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from typing import List, Set, TypeVar, Generic, Callable, Union, Dict
+from typing import List, Set, TypeVar, Generic, Callable, Union, Dict, Iterable
 
 from src.util.collections import flatten
-from src.util.collections import union_sets
+from src.util.collections import union_sets, range_incl
 from src.util.coordinate import Coordinate
 
 T = TypeVar('T')
@@ -16,12 +16,6 @@ R = TypeVar('R')
 class Cell(Generic[T]):
     coord: Coordinate
     value: T
-
-    def __post_init__(self):
-        self.hash_value = hash(self.coord) * hash(self.value)
-
-    def __hash__(self):
-        return self.hash_value
 
     @property
     def row(self):
@@ -35,6 +29,16 @@ class Cell(Generic[T]):
 @dataclass
 class Grid(Generic[T]):
     rows: List[List[Cell[T]]]
+
+    def __post_init__(self):
+        Grid.validate(self.rows)
+
+    @classmethod
+    def validate(cls, rows: List[List]):
+        if len(rows) == 0:
+            raise ValueError("Grid must have at least 1 row")
+        if len(set([len(row) for row in rows])) > 1:
+            raise ValueError("All rows in a grid must have the same length")
 
     @classmethod
     def from_values(cls, values: List[List[T]]) -> Grid[T]:
@@ -50,47 +54,8 @@ class Grid(Generic[T]):
             rows.append(grid_width * [value])
         return Grid.from_values(rows)
 
-    @classmethod
-    def validate(cls, rows: List[List]):
-        if len(rows) == 0:
-            raise ValueError("Grid must have at least 1 row")
-        if len(set([len(row) for row in rows])) > 1:
-            raise ValueError("All rows in a grid must have the same length")
-
-    def __post_init__(self):
-        Grid.validate(self.rows)
-        self.hash_value = 1
-        for row in self.rows:
-            self.hash_value *= sum([hash(cell) for cell in row])
-
-    def __hash__(self):
-        return self.hash_value
-
     def __getitem__(self, row_i: int):
         return self.rows[row_i]
-
-    def get_cell_by_index(self, row_i: int, column_i: int) -> Cell[T]:
-        return self[row_i][column_i]
-
-    def get_cell_by_coord(self, coord: Coordinate) -> Cell[T]:
-        return self[coord.row][coord.column]
-
-    def get_value_by_index(self, row_i: int, column_i: int) -> T:
-        return self[row_i][column_i].value
-
-    def get_value_by_coord(self, coord: Coordinate) -> T:
-        return self[coord.row][coord.column].value
-
-    def get_all_cells(self) -> List[Cell[T]]:
-        return flatten(self.rows)
-
-    def get_all_coordinates(self) -> List[Coordinate]:
-        return [self.rows[row_i][column_i].coord for column_i in range(self.width) for row_i in range(self.height)]
-
-    def get_all_values(self) -> List[T]:
-        return [self.rows[row_i][column_i].value for column_i in range(self.width) for row_i in range(self.height)]
-
-    # ##### AGGREGATION FUNCTIONS #####
 
     @property
     def height(self):
@@ -100,13 +65,45 @@ class Grid(Generic[T]):
     def width(self):
         return len(self.rows[0])
 
+    def freeze(self):
+        return FrozenGrid(self.rows)
+
+    def get_cell_by_index(self, row_i: int, column_i: int) -> Cell[T]:
+        return self[row_i][column_i]
+
+    def get_cell_by_coord(self, coord: Coordinate) -> Cell[T]:
+        return self[coord.row][coord.column]
+
+    def get_cells_by_coords(self, coords: Iterable[Coordinate]) -> List[Cell[T]]:
+        return [self.get_cell_by_coord(coord) for coord in coords]
+
+    def get_value_by_index(self, row_i: int, column_i: int) -> T:
+        return self[row_i][column_i].value
+
+    def get_value_by_coord(self, coord: Coordinate) -> T:
+        return self[coord.row][coord.column].value
+
+    def get_values_by_coords(self, coords: Iterable[Coordinate]) -> List[Cell[T]]:
+        return [self.get_value_by_coord(coord) for coord in coords]
+
+    def get_all_cells(self) -> List[Cell[T]]:
+        return flatten(self.rows)
+
+    def get_all_coords(self) -> List[Coordinate]:
+        return [self.rows[row_i][column_i].coord for row_i in range(self.height) for column_i in range(self.width)]
+
+    def get_all_values(self) -> List[T]:
+        return [self.rows[row_i][column_i].value for row_i in range(self.height) for column_i in range(self.width)]
+
+    # ##### AGGREGATION FUNCTIONS #####
+
     def count_value(self, value: T):
         return self.get_all_values().count(value)
 
-    def min(self):
+    def min_value(self):
         return min(self.get_all_values())
 
-    def max(self):
+    def max_value(self):
         return max(self.get_all_values())
 
     # ##### SELECTION FUNCTIONS #####
@@ -114,11 +111,17 @@ class Grid(Generic[T]):
     def get_row_cells(self, row_i: int) -> List[Cell[T]]:
         return self[row_i]
 
+    def get_row_coords(self, row_i: int) -> List[T]:
+        return [cell.coord for cell in self.get_row_cells(row_i)]
+
     def get_row_values(self, row_i: int) -> List[T]:
         return [cell.value for cell in self.get_row_cells(row_i)]
 
     def get_rows_cells(self) -> List[List[Cell[T]]]:
         return self.rows
+
+    def get_rows_coords(self) -> List[List[T]]:
+        return [[cell.coord for cell in row] for row in self.get_rows_cells()]
 
     def get_rows_values(self) -> List[List[T]]:
         return [[cell.value for cell in row] for row in self.get_rows_cells()]
@@ -126,11 +129,17 @@ class Grid(Generic[T]):
     def get_column_cells(self, column_i: int) -> List[Cell[T]]:
         return [self[row_i][column_i] for row_i in range(0, len(self.rows))]
 
+    def get_column_coords(self, column_i: int) -> List[T]:
+        return [self[row_i][column_i].coord for row_i in range(0, len(self.rows))]
+
     def get_column_values(self, column_i: int) -> List[T]:
         return [self[row_i][column_i].value for row_i in range(0, len(self.rows))]
 
     def get_columns_cells(self) -> List[List[Cell[T]]]:
         return [self.get_column_cells(column_i) for column_i in range(self.width)]
+
+    def get_columns_coords(self) -> List[List[T]]:
+        return [self.get_column_coords(column_i) for column_i in range(self.width)]
 
     def get_columns_values(self) -> List[List[T]]:
         return [self.get_column_values(column_i) for column_i in range(self.width)]
@@ -138,14 +147,17 @@ class Grid(Generic[T]):
     def get_rows_and_columns_cells(self) -> List[List[Cell[T]]]:
         return self.get_rows_cells() + self.get_columns_cells()
 
+    def get_rows_and_columns_coords(self) -> List[List[T]]:
+        return self.get_rows_coords() + self.get_columns_coords()
+
     def get_rows_and_columns_values(self) -> List[List[T]]:
         return self.get_rows_values() + self.get_columns_values()
 
-    def get_neighbor_cells(self, coord: Coordinate, include_diagonal: bool = True,
+    def get_neighbor_cells(self, coord: Coordinate, include_diagonal: bool,
                            include_own_cell: bool = False) -> List[Cell[T]]:
         neighbors = []
-        for row_i in range(coord.row - 1, coord.row + 2):
-            for column_i in range(coord.column - 1, coord.column + 2):
+        for row_i in range_incl(coord.row - 1, coord.row + 1):
+            for column_i in range_incl(coord.column - 1, coord.column + 1):
                 # Decision to add: check on own cell, diagonal neighbors and grid range.
                 if (row_i != coord.row or column_i != coord.column or include_own_cell) and \
                         (row_i == coord.row or column_i == coord.column or include_diagonal) and \
@@ -153,36 +165,37 @@ class Grid(Generic[T]):
                     neighbors.append(self.get_cell_by_index(row_i, column_i))
         return neighbors
 
-    def get_neighbor_coords(self, coord: Coordinate, include_diagonal: bool = True,
+    def get_neighbor_coords(self, coord: Coordinate, include_diagonal: bool,
                             include_own_cell: bool = False) -> List[Coordinate]:
         return list(map(lambda cell: cell.coord, self.get_neighbor_cells(coord, include_diagonal, include_own_cell)))
 
-    def get_neighbor_values(self, coord: Coordinate, include_diagonal: bool = True,
+    def get_neighbor_values(self, coord: Coordinate, include_diagonal: bool,
                             include_own_cell: bool = False) -> List[T]:
         return list(map(lambda cell: cell.value, self.get_neighbor_cells(coord, include_diagonal, include_own_cell)))
 
-    def get_local_area_cells(self, cell: Cell, spread_function: Callable[[Cell[T], Cell[T]], bool],
-                             include_diagonal: bool = True) -> Set[Cell[T]]:
-        def recurse_local_area(from_cell: Cell, accumulator: Set[Cell[T]]) -> Set[Cell[T]]:
-            new_from_cells = [neighbor_cell for neighbor_cell in
-                              self.get_neighbor_cells(from_cell.coord, include_diagonal)
-                              if neighbor_cell not in accumulator and spread_function(from_cell, neighbor_cell)]
-            accumulator = accumulator.union(new_from_cells)
+    def get_local_area_cells(self, start_coord: Coordinate, spread_function: Callable[[Cell[T], Cell[T]], bool],
+                             include_diagonal: bool) -> List[Cell[T]]:
+        def recurse_local_area(from_cell: Cell, accumulator: Set[Coordinate]) -> Set[Coordinate]:
+            new_from_coords = [neighbor_cell.coord for neighbor_cell in
+                               self.get_neighbor_cells(from_cell.coord, include_diagonal)
+                               if neighbor_cell.coord not in accumulator and spread_function(from_cell, neighbor_cell)]
+            accumulator = accumulator.union(new_from_coords)
             return accumulator | union_sets(
-                recurse_local_area(new_from_cell, accumulator) for new_from_cell in new_from_cells)
+                recurse_local_area(self.get_cell_by_coord(coord), accumulator) for coord in new_from_coords)
 
-        return recurse_local_area(cell, {cell})
+        start_cell = self.get_cell_by_coord(start_coord)
+        return self.get_cells_by_coords(recurse_local_area(start_cell, {start_cell.coord}))
 
     def get_all_orientations(self, include_flip: bool = True) -> List[Grid[T]]:
-        def _append_three_rotations(orientation_list):
+        def append_three_rotations(orientation_list):
             for rotate in range(0, 3):
                 orientation_list.append(orientation_list[-1].rotate_right_once())
 
         orientations = [self.copy()]
-        _append_three_rotations(orientations)
+        append_three_rotations(orientations)
         if include_flip:
             orientations.append(self.flip_horizontal())
-            _append_three_rotations(orientations)
+            append_three_rotations(orientations)
         return orientations
 
     # ##### SEARCH FUNCTIONS #####
@@ -190,7 +203,7 @@ class Grid(Generic[T]):
     def find_cells_by_predicate_on_cell(self, predicate_function: Callable[[Cell[T]], bool]) -> List[Cell[T]]:
         return list(filter(predicate_function, self.get_all_cells()))
 
-    def find_cells_by_predicate_on_coordinate(self, predicate_function: Callable[[Coordinate], bool]) -> List[Cell[T]]:
+    def find_cells_by_predicate_on_coord(self, predicate_function: Callable[[Coordinate], bool]) -> List[Cell[T]]:
         return list(filter(lambda cell: predicate_function(cell.coord), self.get_all_cells()))
 
     def find_cells_by_predicate_on_value(self, predicate_function: Callable[[T], bool]) -> List[Cell[T]]:
@@ -289,8 +302,14 @@ class Grid(Generic[T]):
     def to_string(self, cell_width: int = 1, separate_cells: bool = False) -> str:
         return "\n".join(self.to_string_list(cell_width, separate_cells))
 
+    def to_string_mapped(self, mapping: Dict[str, str]):
+        string = self.to_string()
+        for key, value in mapping.items():
+            string = string.replace(key, value)
+        return string
+
     def to_string_justified(self) -> str:
-        max_width = self.map_values_by_function(str).map_values_by_function(len).max()
+        max_width = self.map_values_by_function(str).map_values_by_function(len).max_value()
         return self.to_string(max_width, True)
 
     def to_string_list(self, cell_width: int = 1, separate_cells: bool = False) -> List[str]:
@@ -301,3 +320,12 @@ class Grid(Generic[T]):
                 line += str(cell.value).rjust(cell_width, " ") + (" " if separate_cells else "")
             lines.append(line)
         return lines + [""]
+
+
+@dataclass
+class FrozenGrid(Grid[T]):
+    def __post_init__(self):
+        self.hash_value = hash(tuple(self.get_all_values()))
+
+    def __hash__(self):
+        return self.hash_value
