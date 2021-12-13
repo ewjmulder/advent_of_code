@@ -59,13 +59,13 @@ class Parser:
         return [int(line) for line in self.lines]
 
     def to_coordinate_list(self, separator: str = _DEFAULT_SEPARATOR) -> List[Coordinate]:
-        return [Coordinate.from_point(x=numbers[0], y=numbers[1]) for numbers in self.to_number_lists(separator)]
+        return [Coordinate.from_point(numbers[0], numbers[1]) for numbers in self.to_number_lists(separator)]
 
     def to_bitstring_list(self) -> List[BitString]:
         return list(map(BitString.from_string, self.lines))
 
     def to_character_grid(self) -> Grid[str]:
-        return Grid[str]([[character for character in line] for line in self.lines])
+        return Grid.from_values([[character for character in line] for line in self.lines])
 
     def to_number_grid(self, separator: Optional[str] = _DEFAULT_SEPARATOR) -> Grid[int]:
         def split_line(line: str) -> List[str]:
@@ -77,7 +77,7 @@ class Parser:
                 # Any other value means: use this specific separator to split.
                 return line.split(separator)
 
-        return Grid[int]([[int(word.strip()) for word in split_line(line)] for line in self.lines])
+        return Grid.from_values([[int(word.strip()) for word in split_line(line)] for line in self.lines])
 
     def to_regex_match(self, pattern: str, type_or_types: Union[Type, List[Type]] = None) -> List[List]:
         result = []

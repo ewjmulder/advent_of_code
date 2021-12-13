@@ -13,11 +13,7 @@ class Solution(BaseSolution):
 
         scores = []
         for n in numbers:
-            print(boards[0].to_string_justified())
-            print("")
             boards = [board.map_values_by_dict({n: CHECKED}) for board in boards]
-            print(boards[0].to_string_justified())
-            print("")
             for board in boards:
                 for line in board.get_rows_and_columns_values():
                     if line.count(CHECKED) == board.width:
@@ -33,4 +29,4 @@ class Solution(BaseSolution):
         return self.solve()[-1]
 
 
-Solution().run(1, SAMPLE)
+Solution().run(2, INPUT)
