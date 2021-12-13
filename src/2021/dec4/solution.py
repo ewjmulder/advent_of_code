@@ -13,11 +13,15 @@ class Solution(BaseSolution):
 
         scores = []
         for n in numbers:
-            boards = [board.replace_values({n: CHECKED}) for board in boards]
+            print(boards[0].to_string_justified())
+            print("")
+            boards = [board.map_values_by_dict({n: CHECKED}) for board in boards]
+            print(boards[0].to_string_justified())
+            print("")
             for board in boards:
-                for line in board.get_rows_and_columns():
+                for line in board.get_rows_and_columns_values():
                     if line.count(CHECKED) == board.width:
-                        scores.append(n * sum(board.replace_values({CHECKED: 0}).flatten()))
+                        scores.append(n * sum(board.map_values_by_dict({CHECKED: 0}).get_all_values()))
                         boards.remove(board)
                         break
         return scores
@@ -29,4 +33,4 @@ class Solution(BaseSolution):
         return self.solve()[-1]
 
 
-Solution().run(2, INPUT)
+Solution().run(1, SAMPLE)

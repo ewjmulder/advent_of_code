@@ -9,6 +9,12 @@ class Coordinate:
     row: int
     column: int
 
+    def __post_init__(self):
+        self.hash_value = (self.row * self.column) + self.column
+
+    def __hash__(self):
+        return self.hash_value
+
     @classmethod
     def from_grid(cls, row: int, column: int) -> Coordinate:
         return Coordinate(row=row, column=column)

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Union, List, Type, Optional
 
 from src.util.bit_string import BitString
+from src.util.coordinate import Coordinate
 from src.util.graph import Graph
 from src.util.grid import Grid
 
@@ -42,20 +43,23 @@ class Parser:
     def to_lines(self) -> List[str]:
         return self.lines
 
+    def to_sections(self) -> List[str]:
+        return self.to_string().split("\n\n")
+
     def to_word_lists(self, separator: str = _DEFAULT_SEPARATOR) -> List[List[str]]:
         return [[word.strip() for word in line.split(separator)] for line in self.lines]
 
     def to_number_lists(self, separator: str = _DEFAULT_SEPARATOR) -> List[List[int]]:
-        return [[int(word) for word in words] for words in self.to_word_lists(separator)]
-
-    def to_sections(self) -> List[str]:
-        return self.to_string().split("\n\n")
+        return [[int(word.strip()) for word in words] for words in self.to_word_lists(separator)]
 
     def to_number_list_single_line(self, separator: str = _DEFAULT_SEPARATOR) -> List[int]:
         return [int(word.strip()) for word in self.lines[0].split(separator)]
 
     def to_number_list_multi_line(self) -> List[int]:
         return [int(line) for line in self.lines]
+
+    def to_coordinate_list(self, separator: str = _DEFAULT_SEPARATOR) -> List[Coordinate]:
+        return [Coordinate.from_point(x=numbers[0], y=numbers[1]) for numbers in self.to_number_lists(separator)]
 
     def to_bitstring_list(self) -> List[BitString]:
         return list(map(BitString.from_string, self.lines))

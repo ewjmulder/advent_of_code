@@ -242,18 +242,18 @@ class Grid(Generic[T]):
     def __str__(self) -> str:
         return self.to_string()
 
-    def to_string(self, cell_width: int = 1, separate_cells: bool = False):
+    def to_string(self, cell_width: int = 1, separate_cells: bool = False) -> str:
         return "\n".join(self.to_string_list(cell_width, separate_cells))
 
     def to_string_justified(self) -> str:
         max_width = self.map_values_by_function(str).map_values_by_function(len).max()
         return self.to_string(max_width, True)
 
-    def to_string_list(self, cell_width: int = 1, separate_cells: bool = False):
+    def to_string_list(self, cell_width: int = 1, separate_cells: bool = False) -> List[str]:
         lines = []
         for row in self.rows:
             line = ""
             for value in row:
                 line += str(value).rjust(cell_width, " ") + (" " if separate_cells else "")
             lines.append(line)
-        return lines
+        return lines + ["\n"]
