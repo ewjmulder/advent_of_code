@@ -27,6 +27,9 @@ class Graph(Generic[T]):
                 g.add_edge((node_from, node_to))
         return Graph(g)
 
+    # @classmethod
+    # def from_directed_edges(cls):
+
     def get_neighbors(self, node: T) -> List[T]:
         return self.wrapped_graph.neighbors(node)
 
