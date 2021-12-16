@@ -21,4 +21,4 @@ class Solution(BaseSolution):
         return self._parse_graph().get_number_of_paths("start", "end", stop_condition)
 
 
-Solution().run(1, SAMPLE)
+Solution().run(2, SAMPLE)

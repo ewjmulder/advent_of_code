@@ -7,6 +7,7 @@ from typing import List, Set, TypeVar, Generic, Callable, Union, Dict, Iterable
 from src.util.collections import flatten
 from src.util.collections import union_sets, range_incl
 from src.util.coordinate import Coordinate
+from src.util.graph import Graph
 
 T = TypeVar('T')
 R = TypeVar('R')
@@ -278,27 +279,19 @@ class Grid(Generic[T]):
     def flip_vertical(self) -> Grid[T]:
         return self.flip_horizontal().rotate_right(2)
 
-    # def to_directed_weighted_graph(self) -> Graph[T]:
-    #     if type(self.rows[0][0].value) != int:
-    #         raise ValueError("Can only create weighted graph with int values")
-    #
-    #     def coord_value(c: Coordinate) -> int:
-    #         return c.row * self.width + c.column
-    #
-    #     graph = digraph()
-    #     for coord in self.get_all_coords():
-    #         graph.add_node(coord_value(coord))
-    #
-    #     for coord in self.get_all_coords():
-    #         for n in risks.get_neighbor_cells(c, include_diagonal=False):
-    #             # if n.coord.x >= c.x and n.coord.y >= c.y:
-    #             graph.add_edge((val(c), val(n.coord)), wt=n.value)
-    #
-    #     graph.add_node(-1)
-    #     graph.add_edge((-1, 0), wt=risks.get_value_by_index(0, 0))
-    #
-    #     graph.add_node(9999999999)
-    #     graph.add_edge((val(risks.rows[-1][-1].coord), 9999999999), wt=0)
+    def to_directed_weighted_graph(self, include_diagonal: bool) -> Graph[T]:
+        if type(self.rows[0][0].value) != int:
+            raise ValueError("Can only create weighted graph with int values")
+
+        def coord_value(c: Coordinate) -> int:
+            return c.row * self.width + c.column
+
+        edges = []
+        for coord in self.get_all_coords():
+            for neighbor in self.get_neighbor_cells(coord, include_diagonal=include_diagonal):
+                edges.append(((coord_value(coord), coord_value(neighbor.coord)), neighbor.value))
+
+        return Graph.from_directed_weighted_edges(edges)
 
     # ##### HIGHER ORDER FUNCTIONS #####
 
