@@ -20,6 +20,10 @@ class BitString:
             return BitString(BitStream(bin=string))
 
     @classmethod
+    def from_hex_string(cls, hex_string: str):
+        return BitString(BitStream(hex=hex_string))
+
+    @classmethod
     def from_bit_list(cls, bit_list: List[int]):
         if len(bit_list) == 0:
             raise ValueError("Input bit list must not be empty")
