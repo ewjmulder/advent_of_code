@@ -20,9 +20,7 @@ def multiply(collection: Iterable[int]):
 
 
 def range_incl(val_from: int, val_to: int) -> List[int]:
-    if val_from == val_to:
-        raise ValueError("No range possible with same val_from and val_to")
-    elif val_to > val_from:
+    if val_to > val_from:
         return list(range(val_from, val_to + 1))
     else:
         return list(range(val_from, val_to - 1, -1))

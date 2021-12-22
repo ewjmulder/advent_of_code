@@ -17,7 +17,7 @@ SAMPLE = "sample"
 SAMPLE_2 = "sample2"
 
 WORD = "([a-zA-Z]+)"
-NUMBER = "([0-9]+)"
+NUMBER = "(-?[0-9]+)"
 ALFANUM = "([a-zA-Z0-9]+)"
 
 
