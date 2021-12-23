@@ -187,18 +187,6 @@ class Grid(Generic[T]):
         start_cell = self.get_cell_by_coord(start_coord)
         return self.get_cells_by_coords(recurse_local_area(start_cell, {start_cell.coord}))
 
-    def get_all_orientations(self, include_flip: bool = True) -> List[Grid[T]]:
-        def append_three_rotations(orientation_list):
-            for rotate in range(0, 3):
-                orientation_list.append(orientation_list[-1].rotate_right_once())
-
-        orientations = [self.copy()]
-        append_three_rotations(orientations)
-        if include_flip:
-            orientations.append(self.flip_horizontal())
-            append_three_rotations(orientations)
-        return orientations
-
     # ##### SEARCH FUNCTIONS #####
 
     def find_cells_by_predicate_on_cell(self, predicate_function: Callable[[Cell[T]], bool]) -> List[Cell[T]]:
@@ -278,6 +266,18 @@ class Grid(Generic[T]):
 
     def flip_vertical(self) -> Grid[T]:
         return self.flip_horizontal().rotate_right(2)
+
+    def get_all_orientations(self, include_flip: bool = True) -> List[Grid[T]]:
+        def append_three_rotations(orientation_list):
+            for rotate in range(0, 3):
+                orientation_list.append(orientation_list[-1].rotate_right_once())
+
+        orientations = [self.copy()]
+        append_three_rotations(orientations)
+        if include_flip:
+            orientations.append(self.flip_horizontal())
+            append_three_rotations(orientations)
+        return orientations
 
     def to_directed_weighted_graph(self, include_diagonal: bool) -> Graph[T]:
         if type(self.rows[0][0].value) != int:

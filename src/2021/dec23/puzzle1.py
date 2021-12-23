@@ -1,4 +1,5 @@
 from src.util import *
 
-x = parse_
+x = Parser.from_file(SAMPLE).to_number_list_multi_line()
 
+print(sum(x))
