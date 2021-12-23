@@ -1,5 +1,3 @@
-import pytest
-
 from src.util.collections import *
 
 
@@ -25,10 +23,8 @@ def test_multiply():
 
 
 def test_range_incl():
+    assert range_incl(1, 1) == [1]
     assert range_incl(1, 2) == [1, 2]
     assert range_incl(1, 10) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     assert range_incl(5, 0) == [5, 4, 3, 2, 1, 0]
     assert range_incl(2, -2) == [2, 1, 0, -1, -2]
-
-    with pytest.raises(ValueError):
-        range_incl(1, 1)

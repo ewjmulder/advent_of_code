@@ -8,9 +8,18 @@ def create_test_grid():
     return Grid.from_values([[1, 2, 3], [4, 5, 6]])
 
 
+def create_bit_test_grid():
+    return Grid.from_values([[1, 1, 1, 1], [0, 1, 0, 0], [1, 1, 0, 0]])
+
+
 @pytest.fixture
 def test_grid():
     return create_test_grid()
+
+
+@pytest.fixture
+def bit_test_grid():
+    return create_bit_test_grid()
 
 
 def test_data_class_features(test_grid: Grid[int]):
@@ -286,13 +295,96 @@ def test_get_local_area_cells(test_grid: Grid[int]):
                Cell(Coordinate(0, 0), 1), Cell(Coordinate(1, 1), 5)
            ]
 
+
+def test_find_cells_by_predicate_on_cell(test_grid: Grid[int]):
+    assert test_grid.find_cells_by_predicate_on_cell(lambda cell: cell.value >= 3 and cell.coord.column >= 1) == \
+           [Cell(Coordinate(0, 2), 3), Cell(Coordinate(1, 1), 5), Cell(Coordinate(1, 2), 6)]
+
+
+def test_find_cells_by_predicate_on_coord(test_grid: Grid[int]):
+    assert test_grid.find_cells_by_predicate_on_coord(lambda coord: coord.row + coord.column == 2) == \
+           [Cell(Coordinate(0, 2), 3), Cell(Coordinate(1, 1), 5)]
+
+
+def test_find_cells_by_predicate_on_value(test_grid: Grid[int]):
+    assert test_grid.find_cells_by_predicate_on_value(lambda value: value % 2 == 0) == \
+           [Cell(Coordinate(0, 1), 2), Cell(Coordinate(1, 0), 4), Cell(Coordinate(1, 2), 6)]
+
+
+def test_find_cells_by_value(test_grid: Grid[int]):
+    assert test_grid.find_cells_by_value(1) == [Cell(Coordinate(0, 0), 1)]
+    assert test_grid.find_cells_by_value([2, 4]) == [Cell(Coordinate(0, 1), 2), Cell(Coordinate(1, 0), 4)]
+
+
+def test_find_most_common_value_in_grid(bit_test_grid: Grid[int]):
+    assert bit_test_grid.find_most_common_value_in_grid() == 1
+
+
+def test_find_most_common_value_in_row(bit_test_grid: Grid[int]):
+    assert bit_test_grid.find_most_common_value_in_row(0) == 1
+    assert bit_test_grid.find_most_common_value_in_row(1) == 0
+    assert bit_test_grid.find_most_common_value_in_row(2) is None
+    assert bit_test_grid.find_most_common_value_in_row(2, default_for_tie=2) == 2
+
+
+def test_find_most_common_value_in_column(bit_test_grid: Grid[int]):
+    assert bit_test_grid.find_most_common_value_in_column(0) == 1
+    assert bit_test_grid.find_most_common_value_in_column(3) == 0
+
+
+def test_find_least_common_value_in_grid(bit_test_grid: Grid[int]):
+    assert bit_test_grid.find_least_common_value_in_grid() == 0
+
+
+def test_find_least_common_value_in_row(bit_test_grid: Grid[int]):
+    assert bit_test_grid.find_least_common_value_in_row(0) == 1
+    assert bit_test_grid.find_least_common_value_in_row(1) == 1
+    assert bit_test_grid.find_least_common_value_in_row(2) is None
+    assert bit_test_grid.find_least_common_value_in_row(2, default_for_tie=2) == 2
+
+
+def test_find_least_common_value_in_column(bit_test_grid: Grid[int]):
+    assert bit_test_grid.find_least_common_value_in_column(0) == 0
+    assert bit_test_grid.find_least_common_value_in_column(3) == 1
+
+
+def test_copy(test_grid: Grid[int]):
+    assert test_grid.copy().rows == [
+        [Cell(Coordinate(0, 0), 1), Cell(Coordinate(0, 1), 2), Cell(Coordinate(0, 2), 3)],
+        [Cell(Coordinate(1, 0), 4), Cell(Coordinate(1, 1), 5), Cell(Coordinate(1, 2), 6)]
+    ]
+    assert not test_grid.copy() is test_grid
+    assert not test_grid.copy() is test_grid.copy()
+
+
+def test_filter_rows(test_grid: Grid[int]):
+    assert test_grid.filter_rows(lambda row: sum(cell.value for cell in row) > 8) == \
+           Grid([[Cell(Coordinate(1, 0), 4), Cell(Coordinate(1, 1), 5), Cell(Coordinate(1, 2), 6)]])
+
+
+def test_rotate_right(test_grid: Grid[int]):
+    # TODO: fix rotation - coordinates
+    assert test_grid.rotate_right(1) == Grid([
+        [Cell(Coordinate(0, 0), 4), Cell(Coordinate(0, 1), 1)],
+        [Cell(Coordinate(1, 0), 5), Cell(Coordinate(1, 1), 2)],
+        [Cell(Coordinate(2, 0), 6), Cell(Coordinate(2, 1), 3)]
+    ])
+
 # def test_(test_grid: Grid[int]):
 #     assert test_grid.
-#
-#
+
+
 # def test_(test_grid: Grid[int]):
 #     assert test_grid.
-#
-#
+
+
+# def test_(test_grid: Grid[int]):
+#     assert test_grid.
+
+
+# def test_(test_grid: Grid[int]):
+#     assert test_grid.
+
+
 # def test_(test_grid: Grid[int]):
 #     assert test_grid.
