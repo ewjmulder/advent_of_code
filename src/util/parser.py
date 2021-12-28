@@ -52,10 +52,10 @@ class Parser:
     def to_number_lists(self, separator: str = _DEFAULT_SEPARATOR) -> List[List[int]]:
         return [[int(word.strip()) for word in words] for words in self.to_word_lists(separator)]
 
-    def to_number_list_single_line(self, separator: str = _DEFAULT_SEPARATOR) -> List[int]:
+    def to_number_list_from_single_line(self, separator: str = _DEFAULT_SEPARATOR) -> List[int]:
         return [int(word.strip()) for word in self.lines[0].split(separator)]
 
-    def to_number_list_multi_line(self) -> List[int]:
+    def to_number_list_from_multi_line(self) -> List[int]:
         return [int(line) for line in self.lines]
 
     def to_coordinate_list(self, separator: str = _DEFAULT_SEPARATOR) -> List[Coordinate]:
@@ -67,7 +67,7 @@ class Parser:
     def to_character_grid(self) -> Grid[str]:
         return Grid.from_values([[character for character in line] for line in self.lines])
 
-    def to_number_grid(self, separator: Optional[str] = _DEFAULT_SEPARATOR) -> Grid[int]:
+    def to_number_grid(self, separator: Optional[str] = "") -> Grid[int]:
         def split_line(line: str) -> List[str]:
             if separator == "":
                 # Empty string means: no separator, take character by character
