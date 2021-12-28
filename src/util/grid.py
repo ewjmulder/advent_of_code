@@ -257,17 +257,17 @@ class Grid(Generic[T]):
 
     def rotate_left_once(self) -> Grid[T]:
         rotated_rows = []
-        for i in reversed(range(0, self.width)):
-            rotated_rows.append(self.get_column_cells(i))
-        return Grid[T](rotated_rows)
+        for column_i in reversed(range(0, self.width)):
+            rotated_rows.append(self.get_column_values(column_i))
+        return Grid.from_values(rotated_rows)
 
     def flip_horizontal(self) -> Grid[T]:
-        return Grid[T]([list(reversed(row)) for row in self.rows])
+        return Grid.from_values([list(reversed(row_values)) for row_values in self.get_rows_values()])
 
     def flip_vertical(self) -> Grid[T]:
         return self.flip_horizontal().rotate_right(2)
 
-    def get_all_orientations(self, include_flip: bool = True) -> List[Grid[T]]:
+    def get_all_orientations(self, include_flip: bool) -> List[Grid[T]]:
         def append_three_rotations(orientation_list):
             for rotate in range(0, 3):
                 orientation_list.append(orientation_list[-1].rotate_right_once())
@@ -296,12 +296,13 @@ class Grid(Generic[T]):
     # ##### HIGHER ORDER FUNCTIONS #####
 
     def map_values_by_function(self, mapping_function: Callable[[T], R]) -> Grid[R]:
-        return self.map_cells(lambda cell: mapping_function(cell.value))
+        return self.map_cells_by_function(lambda cell: mapping_function(cell.value))
 
     def map_values_by_dict(self, replacements: Dict[T, T]) -> Grid[T]:
-        return self.map_cells(lambda cell: replacements[cell.value] if cell.value in replacements else cell.value)
+        return self.map_cells_by_function(
+            lambda cell: replacements[cell.value] if cell.value in replacements else cell.value)
 
-    def map_cells(self, mapping_function: Callable[[Cell[T]], R]) -> Grid[R]:
+    def map_cells_by_function(self, mapping_function: Callable[[Cell[T]], R]) -> Grid[R]:
         def map_cell(cell: Cell[T]) -> Cell[R]:
             return Cell(cell.coord, mapping_function(cell))
 
@@ -325,7 +326,7 @@ class Grid(Generic[T]):
 
     def to_string_justified(self) -> str:
         max_width = self.map_values_by_function(str).map_values_by_function(len).max_value()
-        return self.to_string(max_width, True)
+        return self.to_string(max_width, separate_cells=True)
 
     def to_string_list(self, cell_width: int = 1, separate_cells: bool = False) -> List[str]:
         lines = []

@@ -13,6 +13,13 @@ def test_from_string():
         BitString.from_string("")
 
 
+def test_from_hex_string():
+    assert BitString.from_hex_string("0000").to_int() == 0
+    assert BitString.from_hex_string("abcd").to_int() == 43981
+    assert BitString.from_hex_string("B4A6").to_int() == 46246
+    assert BitString.from_hex_string("FFFF").to_int() == 65535
+
+
 def test_from_bit_list():
     assert BitString.from_bit_list([1]).to_string() == "1"
     assert BitString.from_bit_list([1, 1, 0, 1]).to_string() == "1101"

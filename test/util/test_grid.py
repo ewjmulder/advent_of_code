@@ -363,28 +363,105 @@ def test_filter_rows(test_grid: Grid[int]):
 
 
 def test_rotate_right(test_grid: Grid[int]):
-    # TODO: fix rotation - coordinates
     assert test_grid.rotate_right(1) == Grid([
         [Cell(Coordinate(0, 0), 4), Cell(Coordinate(0, 1), 1)],
         [Cell(Coordinate(1, 0), 5), Cell(Coordinate(1, 1), 2)],
         [Cell(Coordinate(2, 0), 6), Cell(Coordinate(2, 1), 3)]
     ])
 
-# def test_(test_grid: Grid[int]):
-#     assert test_grid.
+
+def test_rotate_right_once(test_grid: Grid[int]):
+    assert test_grid.rotate_right_once() == test_grid.rotate_right(1)
 
 
-# def test_(test_grid: Grid[int]):
-#     assert test_grid.
+def test_rotate_left(test_grid: Grid[int]):
+    assert test_grid.rotate_left(1) == Grid([
+        [Cell(Coordinate(0, 0), 3), Cell(Coordinate(0, 1), 6)],
+        [Cell(Coordinate(1, 0), 2), Cell(Coordinate(1, 1), 5)],
+        [Cell(Coordinate(2, 0), 1), Cell(Coordinate(2, 1), 4)]
+    ])
 
 
-# def test_(test_grid: Grid[int]):
-#     assert test_grid.
+def test_rotate_left_once(test_grid: Grid[int]):
+    assert test_grid.rotate_left_once() == test_grid.rotate_left(1)
 
 
-# def test_(test_grid: Grid[int]):
-#     assert test_grid.
+def test_flip_horizontal(test_grid: Grid[int]):
+    assert test_grid.flip_horizontal() == Grid([
+        [Cell(Coordinate(0, 0), 3), Cell(Coordinate(0, 1), 2), Cell(Coordinate(0, 2), 1)],
+        [Cell(Coordinate(1, 0), 6), Cell(Coordinate(1, 1), 5), Cell(Coordinate(1, 2), 4)]
+    ])
 
 
-# def test_(test_grid: Grid[int]):
-#     assert test_grid.
+def test_flip_vertical(test_grid: Grid[int]):
+    assert test_grid.flip_vertical() == Grid([
+        [Cell(Coordinate(0, 0), 4), Cell(Coordinate(0, 1), 5), Cell(Coordinate(0, 2), 6)],
+        [Cell(Coordinate(1, 0), 1), Cell(Coordinate(1, 1), 2), Cell(Coordinate(1, 2), 3)]
+    ])
+
+
+def test_get_all_orientations(test_grid: Grid[int]):
+    rotations_no_flip = [
+        test_grid.rotate_right(0), test_grid.rotate_right(1), test_grid.rotate_right(2), test_grid.rotate_right(3)
+    ]
+    assert test_grid.get_all_orientations(include_flip=False) == rotations_no_flip
+
+    test_grid_flipped = test_grid.flip_horizontal()
+    assert test_grid.get_all_orientations(include_flip=True) == rotations_no_flip + [
+        test_grid_flipped.rotate_right(0), test_grid_flipped.rotate_right(1),
+        test_grid_flipped.rotate_right(2), test_grid_flipped.rotate_right(3)
+    ]
+
+
+# TODO: Re-write when Graph has been refactored
+# def test_to_directed_weighted_graph(test_grid: Grid[int]):
+#     assert test_grid.to_directed_weighted_graph(include_diagonal=False) ==
+
+
+def test_map_values_by_function(test_grid: Grid[int]):
+    assert test_grid.map_values_by_function(lambda value: value + 1) == Grid([
+        [Cell(Coordinate(0, 0), 2), Cell(Coordinate(0, 1), 3), Cell(Coordinate(0, 2), 4)],
+        [Cell(Coordinate(1, 0), 5), Cell(Coordinate(1, 1), 6), Cell(Coordinate(1, 2), 7)]
+    ])
+
+
+def test_map_values_by_dict(test_grid: Grid[int]):
+    assert test_grid.map_values_by_dict({1: 11, 3: 33, 4: 44}) == Grid([
+        [Cell(Coordinate(0, 0), 11), Cell(Coordinate(0, 1), 2), Cell(Coordinate(0, 2), 33)],
+        [Cell(Coordinate(1, 0), 44), Cell(Coordinate(1, 1), 5), Cell(Coordinate(1, 2), 6)]
+    ])
+
+
+def test_map_cells_by_function(test_grid: Grid[int]):
+    assert test_grid.map_cells_by_function(lambda cell: cell.value + cell.coord.row + cell.coord.column) == Grid([
+        [Cell(Coordinate(0, 0), 1), Cell(Coordinate(0, 1), 3), Cell(Coordinate(0, 2), 5)],
+        [Cell(Coordinate(1, 0), 5), Cell(Coordinate(1, 1), 7), Cell(Coordinate(1, 2), 9)]
+    ])
+
+
+def test___str___(test_grid: Grid[int]):
+    assert test_grid.__str__() == test_grid.to_string()
+
+
+def test_to_string(test_grid: Grid[int]):
+    assert test_grid.to_string() == "123\n456\n"
+    assert test_grid.to_string(cell_width=2) == " 1 2 3\n 4 5 6\n"
+    assert test_grid.to_string(separate_cells=True) == "1 2 3 \n4 5 6 \n"
+    assert test_grid.to_string(cell_width=3, separate_cells=True) == "  1   2   3 \n  4   5   6 \n"
+
+
+def test_to_string_mapped(test_grid: Grid[int]):
+    assert test_grid.to_string_mapped({"1": "a", "2": "b", "5": "e"}) == "ab3\n4e6\n"
+
+
+def test_to_string_justified(test_grid: Grid[int]):
+    assert test_grid.to_string_justified() == "1 2 3 \n4 5 6 \n"
+    assert test_grid.map_values_by_dict({1: 111}).to_string_justified() == "111   2   3 \n  4   5   6 \n"
+
+
+def test_to_string_list(test_grid: Grid[int]):
+    assert test_grid.to_string_list() == test_grid.to_string().splitlines() + [""]
+    assert test_grid.to_string_list(cell_width=2) == test_grid.to_string(cell_width=2).splitlines() + [""]
+    assert test_grid.to_string_list(separate_cells=True) == test_grid.to_string(separate_cells=True).splitlines() + [""]
+    assert test_grid.to_string_list(cell_width=3, separate_cells=True) == \
+           test_grid.to_string(cell_width=3, separate_cells=True).splitlines() + [""]
