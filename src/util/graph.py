@@ -46,6 +46,12 @@ class Graph(Generic[T]):
             g.add_edge((node_from, node_to), wt=weight)
         return Graph(g)
 
+    def get_nodes(self) -> List[T]:
+        return self.wrapped_graph.nodes()
+
+    def get_edges(self) -> List[Tuple[T, T]]:
+        return self.wrapped_graph.edges()
+
     def get_neighbors(self, node: T) -> List[T]:
         return self.wrapped_graph.neighbors(node)
 
@@ -55,7 +61,8 @@ class Graph(Generic[T]):
     def calc_shortest_path_len(self, from_node: T, to_node: T) -> int:
         return len(self.calc_shortest_path(from_node, to_node)) - 1
 
-    def get_paths(self, start_node: T, end_node: T, stop_condition: Callable[[List[T], T], bool]) -> List[List[T]]:
+    def get_all_paths_by_stop_condition(self, start_node: T, end_node: T,
+                                        stop_condition: Callable[[List[T], T], bool]) -> List[List[T]]:
         def visit(node: T, path: List[T]) -> List[List[T]]:
             return flatten([
                 [path + [end_node]] if neighbor == end_node else visit(neighbor, path + [neighbor])
@@ -65,5 +72,6 @@ class Graph(Generic[T]):
 
         return visit(start_node, [start_node])
 
-    def get_number_of_paths(self, start_node: T, end_node: T, stop_condition: Callable[[List[T], T], bool]) -> int:
-        return len(self.get_paths(start_node, end_node, stop_condition))
+    def get_number_of_paths_by_stop_condition(self, start_node: T, end_node: T,
+                                              stop_condition: Callable[[List[T], T], bool]) -> int:
+        return len(self.get_all_paths_by_stop_condition(start_node, end_node, stop_condition))

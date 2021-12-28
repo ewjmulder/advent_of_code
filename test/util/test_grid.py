@@ -49,6 +49,7 @@ def test_validate():
 
 def test_from_values():
     assert Grid.from_values([[0, 1]]).rows == [[Cell(Coordinate(0, 0), 0), Cell(Coordinate(0, 1), 1)]]
+    assert Grid.from_values([["a", "b"]]).rows == [[Cell(Coordinate(0, 0), "a"), Cell(Coordinate(0, 1), "b")]]
 
 
 def test_fill_grid():
