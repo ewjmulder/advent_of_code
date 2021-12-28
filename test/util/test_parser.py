@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from src.util.coordinate import Coordinate
@@ -6,7 +8,8 @@ from src.util.parser import Parser, WORD, NUMBER, ALFANUM
 
 
 def test_from_file():
-    assert Parser.from_file("test_parser_input").to_lines() == ["123", "456"]
+    input_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_parser_input")
+    assert Parser.from_file(input_file).to_lines() == ["123", "456"]
 
 
 def test_from_string():
@@ -85,11 +88,22 @@ def test_to_regex_match():
         f"alfanum {ALFANUM}") == [["4lf4n1m"], ["0a1b2c"]]
 
     with pytest.raises(ValueError):
+        Parser.from_lines(["abc"]).to_regex_match(WORD, "no_type")
+
+    with pytest.raises(ValueError):
         Parser.from_lines(["some line"]).to_regex_match("not that line")
 
     with pytest.raises(ValueError):
         Parser.from_lines(["abc"]).to_regex_match(NUMBER)
 
-# TODO: test if graph is refactored
-# def test_to_string_graph():
-#     pass
+
+def test_to_string_graph():
+    number_graph = Parser.from_lines(["Haarlem to Utrecht", "Utrecht to Driebergen"]).to_string_graph("to")
+    assert number_graph.get_nodes() == ["Haarlem", "Utrecht", "Driebergen"]
+    assert number_graph.get_edges() == [(("Haarlem", "Utrecht"), 1), (("Utrecht", "Driebergen"), 1)]
+
+
+def test_to_number_graph():
+    number_graph = Parser.from_lines(["12 -> 34", "34 -> 56", "56 -> 78"]).to_number_graph("->")
+    assert number_graph.get_nodes() == [12, 34, 56, 78]
+    assert number_graph.get_edges() == [((12, 34), 1), ((34, 56), 1), ((56, 78), 1)]

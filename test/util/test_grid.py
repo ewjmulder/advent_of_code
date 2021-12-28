@@ -4,27 +4,19 @@ from src.util.coordinate import Coordinate
 from src.util.grid import Grid, Cell, FrozenGrid
 
 
-def create_test_grid():
+@pytest.fixture
+def test_grid() -> Grid[int]:
     return Grid.from_values([[1, 2, 3], [4, 5, 6]])
 
 
-def create_bit_test_grid():
+@pytest.fixture
+def bit_test_grid() -> Grid[int]:
     return Grid.from_values([[1, 1, 1, 1], [0, 1, 0, 0], [1, 1, 0, 0]])
-
-
-@pytest.fixture
-def test_grid():
-    return create_test_grid()
-
-
-@pytest.fixture
-def bit_test_grid():
-    return create_bit_test_grid()
 
 
 def test_data_class_features(test_grid: Grid[int]):
     # Grids should be equal if their data is equal
-    assert test_grid == create_test_grid()
+    assert test_grid == Grid.from_values([[1, 2, 3], [4, 5, 6]])
 
     # Normal Grid cannot be hashed, since it's mutable
     with pytest.raises(TypeError):
@@ -414,9 +406,25 @@ def test_get_all_orientations(test_grid: Grid[int]):
     ]
 
 
-# TODO: Re-write when Graph has been refactored
-# def test_to_directed_weighted_graph(test_grid: Grid[int]):
-#     assert test_grid.to_directed_weighted_graph(include_diagonal=False) ==
+def test_to_directed_weighted_graph(test_grid: Grid[int]):
+    graph_not_diagonal = test_grid.to_directed_weighted_graph(include_diagonal=False)
+    assert sorted(graph_not_diagonal.get_nodes()) == [0, 1, 2, 3, 4, 5]
+    assert graph_not_diagonal.get_edges() == [
+        ((0, 1), 2), ((0, 3), 4), ((1, 0), 1), ((1, 2), 3), ((1, 4), 5),
+        ((2, 1), 2), ((2, 5), 6), ((3, 0), 1), ((3, 4), 5),
+        ((4, 1), 2), ((4, 3), 4), ((4, 5), 6), ((5, 2), 3), ((5, 4), 5)
+    ]
+
+    graph_diagonal = test_grid.to_directed_weighted_graph(include_diagonal=True)
+    assert sorted(graph_diagonal.get_nodes()) == [0, 1, 2, 3, 4, 5]
+    assert graph_diagonal.get_edges() == [
+        ((0, 1), 2), ((0, 3), 4), ((0, 4), 5), ((1, 0), 1), ((1, 2), 3), ((1, 3), 4), ((1, 4), 5), ((1, 5), 6),
+        ((2, 1), 2), ((2, 4), 5), ((2, 5), 6), ((3, 0), 1), ((3, 1), 2), ((3, 4), 5),
+        ((4, 0), 1), ((4, 1), 2), ((4, 2), 3), ((4, 3), 4), ((4, 5), 6), ((5, 1), 2), ((5, 2), 3), ((5, 4), 5)
+    ]
+
+    with pytest.raises(ValueError):
+        Grid.from_values([["a", "b"]]).to_directed_weighted_graph(include_diagonal=False)
 
 
 def test_map_values_by_function(test_grid: Grid[int]):

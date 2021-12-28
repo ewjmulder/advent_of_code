@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, List, TypeVar, Generic, Callable, Tuple
+from typing import Iterable, List, TypeVar, Generic, Tuple, Callable
 
-from pygraph.algorithms.minmax import shortest_path as shortest_paths, path as shortest_path
-from pygraph.classes.digraph import digraph
-from pygraph.classes.graph import graph
+from igraph import Graph as IGraph
 
 from src.util.collections import flatten
 
@@ -14,49 +12,58 @@ T = TypeVar('T')
 
 @dataclass
 class Graph(Generic[T]):
-    wrapped_graph: graph
+    igraph: IGraph
 
     @classmethod
     def from_edges(cls, edges: Iterable[Iterable[T]]) -> Graph[T]:
         """Creates an undirected, unweighted graph"""
-        return cls._add_edges_to_graph(graph(), [(list(edge), 1) for edge in edges])
+        return cls._from_edges(False, [(list(edge), 1) for edge in edges])
 
     @classmethod
     def from_weighted_edges(cls, edges: Iterable[(Iterable[T], int)]) -> Graph[T]:
         """Creates an undirected, weighted graph"""
-        return cls._add_edges_to_graph(graph(), [(list(edge), weight) for edge, weight in edges])
+        return cls._from_edges(False, [(list(edge), weight) for edge, weight in edges])
 
     @classmethod
     def from_directed_edges(cls, edges: Iterable[Iterable[T]]) -> Graph[T]:
         """Creates an directed, unweighted graph"""
-        return cls._add_edges_to_graph(digraph(), [(list(edge), 1) for edge in edges])
+        return cls._from_edges(True, [(list(edge), 1) for edge in edges])
 
     @classmethod
     def from_directed_weighted_edges(cls, edges: Iterable[(Iterable[T], int)]) -> Graph[T]:
         """Creates an directed, weighted graph"""
-        return cls._add_edges_to_graph(digraph(), [(list(edge), weight) for edge, weight in edges])
+        return cls._from_edges(True, [(list(edge), weight) for edge, weight in edges])
 
     @classmethod
-    def _add_edges_to_graph(cls, g, edges: List[Tuple[List[T], int]]):
+    def _from_edges(cls, directed: bool, edges: List[Tuple[List[T], int]]):
+        igraph = IGraph(directed=directed)
         for edge, weight in edges:
             for node in edge:
-                if not g.has_node(node):
-                    g.add_node(node)
+                if len(igraph.vs) == 0 or node not in igraph.vs["node"]:
+                    igraph.add_vertex(str(node), node=node)
         for (node_from, node_to), weight in edges:
-            g.add_edge((node_from, node_to), wt=weight)
-        return Graph(g)
+            igraph.add_edge(str(node_from), str(node_to), edge=(node_from, node_to), weight=weight)
+        return Graph(igraph)
+
+    def _vertex_indices_to_nodes(self, vertex_indices: Iterable[int]) -> List[T]:
+        node_values = self.igraph.vs["node"]
+        return [node_values[vertex_index] for vertex_index in vertex_indices]
 
     def get_nodes(self) -> List[T]:
-        return self.wrapped_graph.nodes()
+        return self.igraph.vs["node"]
 
     def get_edges(self) -> List[Tuple[T, T]]:
-        return self.wrapped_graph.edges()
+        return list(zip(self.igraph.es["edge"], self.igraph.es["weight"]))
 
     def get_neighbors(self, node: T) -> List[T]:
-        return self.wrapped_graph.neighbors(node)
+        return self._vertex_indices_to_nodes(self.igraph.neighbors(str(node), mode="out"))
+
+    def is_directed(self) -> bool:
+        return self.igraph.is_directed()
 
     def calc_shortest_path(self, from_node: T, to_node: T) -> List[T]:
-        return list(reversed(shortest_path(shortest_paths(self.wrapped_graph, from_node)[0], to_node)))
+        return self._vertex_indices_to_nodes(
+            self.igraph.get_shortest_paths(str(from_node), str(to_node), weights=self.igraph.es["weight"])[0])
 
     def calc_shortest_path_len(self, from_node: T, to_node: T) -> int:
         return len(self.calc_shortest_path(from_node, to_node)) - 1
@@ -66,7 +73,7 @@ class Graph(Generic[T]):
         def visit(node: T, path: List[T]) -> List[List[T]]:
             return flatten([
                 [path + [end_node]] if neighbor == end_node else visit(neighbor, path + [neighbor])
-                for neighbor in self.wrapped_graph.neighbors(node)
+                for neighbor in self.get_neighbors(node)
                 if neighbor != start_node and not stop_condition(path, neighbor)
             ])
 

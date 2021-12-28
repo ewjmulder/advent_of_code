@@ -92,6 +92,8 @@ class Parser:
                     groups = [type_or_types(group) for group in groups]
                 elif type(type_or_types) == list:
                     groups = [type_converter(group) for type_converter, group in zip(type_or_types, groups)]
+                else:
+                    raise ValueError("type_or_types should be a type or a list of types")
             result.append(groups)
         return result
 
